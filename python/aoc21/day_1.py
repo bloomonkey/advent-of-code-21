@@ -2,9 +2,11 @@
 """Day 1."""
 import asyncio
 from collections import deque
-from typing import AsyncIterable
+from pathlib import Path
+from typing import AsyncIterable, Optional
 
 import aiofiles
+import typer
 
 
 async def count_increasing_depths(depths: AsyncIterable[int]) -> int:
@@ -19,7 +21,9 @@ async def count_increasing_depths(depths: AsyncIterable[int]) -> int:
     return increasing_count
 
 
-async def sum_window_depths(depths: AsyncIterable[int], window_size: int) -> int:
+async def sum_window_depths(
+    depths: AsyncIterable[int], window_size: int
+) -> int:
     window = deque([], maxlen=window_size)
     for x in range(window_size - 1):
         window.append(await depths.__anext__())
@@ -28,20 +32,19 @@ async def sum_window_depths(depths: AsyncIterable[int], window_size: int) -> int
         yield sum(window)
 
 
-async def main() -> None:
-    window_size = 3
+async def _main(window_size: int) -> None:
 
-    # Test
-    async with aiofiles.open('data/test-1.txt') as f:
-        depths = (int(line) async for line in f)
-        sum_depths = sum_window_depths(depths, window_size)
-        assert await count_increasing_depths(sum_depths) == 5
-
-    async with aiofiles.open('data/input-1.txt') as f:
+    async with aiofiles.open(
+        Path(__file__).parent / ".." / ".." / "data" / "input-1.txt"
+    ) as f:
         depths = (int(line) async for line in f)
         sum_depths = sum_window_depths(depths, window_size)
         print(await count_increasing_depths(sum_depths))
 
 
+def main(window_size: Optional[int] = typer.Option(1)):
+    asyncio.run(_main(window_size))
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    typer.run(main)
