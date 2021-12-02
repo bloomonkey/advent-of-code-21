@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Document test_day_2 here.
 
-Copyright (C) 2021, Auto Trader UK
 Created 02. Dec 2021 10:54
 
 """
