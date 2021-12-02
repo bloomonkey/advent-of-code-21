@@ -30,6 +30,7 @@ def instructions():
     return _inner()
 
 
+@pytest.mark.xfail(reason="New information on how the sub should respond")
 @pytest.mark.asyncio
 async def test_part_1(instructions: AsyncIterator[str]):
     sub = Submarine()
@@ -38,4 +39,15 @@ async def test_part_1(instructions: AsyncIterator[str]):
         sub.move(instruction)
 
     assert sub.horizontal == 15
-    assert sub.vertical == 10
+    assert sub.depth == 10
+
+
+@pytest.mark.asyncio
+async def test_part_2(instructions: AsyncIterator[str]):
+    sub = Submarine()
+
+    async for instruction in instructions:
+        sub.move(instruction)
+
+    assert sub.horizontal == 15
+    assert sub.depth == 60
