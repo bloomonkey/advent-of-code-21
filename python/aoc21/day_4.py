@@ -5,11 +5,12 @@ Created 04. Dec 2021 14:13
 
 """
 import asyncio
-from pathlib import Path
 from typing import AsyncIterable, List
 
 import aiofiles
 import typer
+
+from aoc21 import get_input_path
 
 
 class NoWinner(Exception):
@@ -97,8 +98,7 @@ class Bingo:
 
 
 async def _main():
-    input_path = Path(__file__).parent.parent.parent / "data" / "input-4.txt"
-    async with aiofiles.open(input_path, mode="r") as f:
+    async with aiofiles.open(get_input_path("input-4.txt"), mode="r") as f:
         bingo = await Bingo.parse(f)
 
     results = await bingo.play()
