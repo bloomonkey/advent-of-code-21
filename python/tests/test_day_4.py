@@ -68,7 +68,13 @@ async def test_columns():
 async def test_parse_call_and_boards(lines):
     bingo = await Bingo.parse(lines)
 
-    winner = await bingo.play()
-    assert winner.score == 4512
+    results = await bingo.play()
+    assert results[0].score == 4512
 
 
+@pytest.mark.asyncio
+async def test_parse_call_and_boards(lines):
+    bingo = await Bingo.parse(lines)
+
+    results = await bingo.play()
+    assert results[-1].score == 1924
