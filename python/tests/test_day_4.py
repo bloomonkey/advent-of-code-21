@@ -6,7 +6,7 @@ Copyright (C) 2021, Auto Trader UK
 """
 import pytest
 
-from day_4 import Bingo
+from day_4 import Bingo, Board
 
 
 @pytest.fixture()
@@ -54,7 +54,7 @@ async def test_parse_call_and_boards(lines):
 async def test_columns():
     bingo = Bingo(
         [
-            Bingo.Board(
+            Board(
                 [["1"] * 5, ["2"] * 5, ["3"] * 5, ["4"] * 5, ["5"] * 5]
             )
         ],

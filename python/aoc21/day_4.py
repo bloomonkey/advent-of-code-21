@@ -6,7 +6,7 @@ Created 04. Dec 2021 14:13
 """
 import asyncio
 from pathlib import Path
-from typing import AsyncIterable, List, Optional
+from typing import AsyncIterable, List
 
 import aiofiles
 import typer
@@ -16,54 +16,52 @@ class NoWinner(Exception):
     pass
 
 
+class Board:
+    WIN = [None] * 5
+
+    def __init__(self, rows: List[List[str]]):
+        self.rows = rows
+        self._score = None
+
+    @property
+    def columns(self) -> List[List[str]]:
+        return [list(r) for r in zip(*self.rows)]
+
+    @property
+    def score(self) -> int:
+        return self._score
+
+    @property
+    def is_complete(self) -> bool:
+        return self.WIN in self.rows or self.WIN in self.columns
+
+    def play(self, call):
+        """Play the round."""
+        for row in self.rows:
+            try:
+                row[row.index(call)] = None
+            except ValueError:
+                pass  # Not in row
+
+        if self.is_complete:
+            self._score = int(call) * self._calculate_board_score()
+
+    def _calculate_board_score(self):
+        return sum(
+            [
+                sum([int(cell) for cell in row if cell is not None])
+                for row in self.rows
+            ]
+        )
+
+
 class Bingo:
-    class Board:
-
-        WIN = [None] * 5
-
-        def __init__(self, rows: List[str]):
-            self.rows = rows
-            self._score = None
-
-        @property
-        def columns(self):
-            return [list(r) for r in zip(*self.rows)]
-
-        @property
-        def score(self) -> int:
-            return self._score
-
-        @property
-        def is_complete(self) -> bool:
-            return self.WIN in self.rows or self.WIN in self.columns
-
-        def play(self, call) -> bool:
-            for row in self.rows:
-                try:
-                    row[row.index(call)] = None
-                except ValueError:
-                    # Not in row
-                    pass
-
-            if self.is_complete:
-                self._score = int(call) * self._calculate_board_score()
-                return True
-            return False
-
-        def _calculate_board_score(self):
-            return sum(
-                [
-                    sum([int(cell) for cell in row if cell is not None])
-                    for row in self.rows
-                ]
-            )
-
     def __init__(self, boards: List[Board], calls: List[str]):
         self.boards = boards
         self.calls = calls
 
     @classmethod
-    async def parse(cls, lines: AsyncIterable[str]):
+    async def parse(cls, lines: AsyncIterable[str]) -> "Bingo":
         calls_line = await lines.__anext__()
         calls = calls_line.strip().split(",")
         rows = [line.strip().split() async for line in lines if line.strip()]
@@ -72,32 +70,30 @@ class Bingo:
             b = []
             for _ in range(5):
                 b.append(rows.pop(0))
-            boards.append(cls.Board(b))
+            boards.append(Board(b))
         return Bingo(boards, calls)
 
     async def play(self) -> List[Board]:
-        boards = self.boards.copy()
+        """Play the game, return boards in order of finish."""
         results = []
         for call in self.calls:
-            completed = await self._play_round(boards, call)
-            results.extend(completed)
-            for board in completed:
-                boards.remove(board)
-
-            asyncio.sleep(0)
-            if not boards:
+            incomplete_boards = [b for b in self.boards if not b.is_complete]
+            if not incomplete_boards:
                 break
+
+            results.extend(await self._play_round(incomplete_boards, call))
+            asyncio.sleep(0)
         else:
             raise NoWinner()
 
         return results
 
     async def _play_round(self, boards, call):
-        completed = []
+        """Play a single round"""
         for board in boards:
-            if board.play(call):
-                completed.append(board)
-        return completed
+            board.play(call)
+
+        return [board for board in boards if board.is_complete]
 
 
 async def _main():
