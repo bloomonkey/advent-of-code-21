@@ -16,15 +16,19 @@ from aoc21 import get_input_path
 class LanternfishSimulator:
 
     def __init__(self, population: CounterType[int]):
-        self.population = Counter(population)
+        self._population = Counter(population)
 
     @classmethod
     async def parse(cls, pop: str) -> "LanternfishSimulator":
         return LanternfishSimulator(Counter(map(int, pop.strip().split(","))))
 
     @property
+    def population(self):
+        return self._population.elements()
+
+    @property
     def population_count(self):
-        return sum(self.population.values())
+        return sum(self._population.values())
 
     async def run_days(self, n: int) -> AsyncGenerator[CounterType[int], None]:
         for n in range(n):
@@ -33,14 +37,14 @@ class LanternfishSimulator:
             await asyncio.sleep(0)
 
     async def _run_day(self):
-        n_birthers = self.population.pop(0, 0)
-        self.population = Counter(
+        n_birthers = self._population.pop(0, 0)
+        self._population = Counter(
             {
                 days_until_birth - 1: count
-                for days_until_birth, count in self.population.items()
+                for days_until_birth, count in self._population.items()
             }
         )
-        self.population.update({6: n_birthers, 8: n_birthers})
+        self._population.update({6: n_birthers, 8: n_birthers})
 
 
 async def _main(days: int):
