@@ -15,7 +15,7 @@ async def test_lanternfish_model():
     start_state = "3,4,3,1,2"
     sim = await LanternfishSimulator.parse(start_state)
     async for population in sim.run_days(18):
-        print(",".join(map(str, population)))
+        print(repr(population))
 
     assert sim.population_count == 26
 

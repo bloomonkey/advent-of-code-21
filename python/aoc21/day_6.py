@@ -5,7 +5,8 @@ Created 06. Dec 2021 19:34
 
 """
 import asyncio
-from typing import AsyncGenerator, List
+from collections import Counter
+from typing import AsyncGenerator, Counter as CounterType
 
 import aiofiles
 import typer
@@ -14,32 +15,32 @@ from aoc21 import get_input_path
 
 class LanternfishSimulator:
 
-    def __init__(self, population: List[int]):
-        self.population = population
+    def __init__(self, population: CounterType[int]):
+        self.population = Counter(population)
 
     @classmethod
     async def parse(cls, pop: str) -> "LanternfishSimulator":
-        return LanternfishSimulator(list(map(int, pop.strip().split(","))))
+        return LanternfishSimulator(Counter(map(int, pop.strip().split(","))))
 
     @property
     def population_count(self):
-        return len(self.population)
+        return sum(self.population.values())
 
-    async def run_days(self, n: int) -> AsyncGenerator[List[int], None]:
+    async def run_days(self, n: int) -> AsyncGenerator[CounterType[int], None]:
         for n in range(n):
             await self._run_day()
             yield self.population
             await asyncio.sleep(0)
 
     async def _run_day(self):
-        newborns = [8] * self.population.count(0)
-        for i, fish in enumerate(self.population):
-            if fish == 0:
-                self.population[i] = 6
-            else:
-                self.population[i] -= 1
-
-        self.population.extend(newborns)
+        n_birthers = self.population.pop(0, 0)
+        self.population = Counter(
+            {
+                days_until_birth - 1: count
+                for days_until_birth, count in self.population.items()
+            }
+        )
+        self.population.update({6: n_birthers, 8: n_birthers})
 
 
 async def _main(days: int):
