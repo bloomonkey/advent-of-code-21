@@ -8,6 +8,8 @@ import pytest
 
 from day_4 import Bingo, Board
 
+from .test_utils import async_iter_lines
+
 
 @pytest.fixture()
 def lines():
@@ -31,12 +33,7 @@ def lines():
 18  8 23 26 20
 22 11 13  6  5
  2  0 12  3  7"""
-
-    async def _inner():
-        for row in data.split("\n"):
-            yield row
-
-    return _inner()
+    return async_iter_lines(data)
 
 
 @pytest.mark.asyncio
