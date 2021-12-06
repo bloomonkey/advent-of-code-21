@@ -54,8 +54,9 @@ class HydrothermalMap:
                 # Vertical
                 grid = await self._plot_vertical(line, grid)
             else:
-                # Diagonal?
-                pass
+                # Diagonal
+                grid = await self._plot_diagonal(line, grid)
+
         return grid
 
     async def plot_map(self) -> str:
@@ -100,6 +101,19 @@ class HydrothermalMap:
         for x in range(start.x, end.x + 1):
             # Horizontal line will not enter this loop, can used fixed y
             grid[start.y][x] += 1
+
+        return grid
+
+    async def _plot_diagonal(self, line, grid: Grid) -> Grid:
+        n_x = abs(line.end.x - line.start.x)
+        n_y = abs(line.end.y - line.start.y)
+        n = max(n_x, n_y)
+        x_increment = 1 if line.start.x < line.end.x else -1
+        y_increment = 1 if line.start.y < line.end.y else -1
+        for i in range(n + 1):
+            grid[line.start.y + (i * y_increment)][
+                line.start.x + (i * x_increment)
+            ] += 1
 
         return grid
 

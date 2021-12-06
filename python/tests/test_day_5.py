@@ -44,15 +44,15 @@ async def test_plot_map(lines):
     map = await HydrothermalMap.parse(lines)
 
     expected_map = """\
-.......1..
-..1....1..
-..1....1..
-.......1..
-.112111211
-..........
-..........
-..........
-..........
+1.1....11.
+.111...2..
+..2.1.111.
+...1.2.2..
+.112313211
+...1.2....
+..1...1...
+.1.....1..
+1.......1.
 222111...."""
 
     assert await map.plot_map() == expected_map
@@ -61,4 +61,4 @@ async def test_plot_map(lines):
 @pytest.mark.asyncio
 async def test_count_danger_spots(lines):
     map = await HydrothermalMap.parse(lines)
-    assert await map.count_danger_spots() == 5
+    assert await map.count_danger_spots() == 12
